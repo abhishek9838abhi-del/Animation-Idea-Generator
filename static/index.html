@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frame by Frame: Animation Idea Generator</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation & Status -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-group">
+        <span class="logo-icon">🎬</span>
+        <div>
+          <h1 class="logo-title">Frame by Frame</h1>
+          <p class="logo-subtitle">Short-Animation Idea & Storyboard Planner</p>
+        </div>
+      </div>
+      <div class="status-container">
+        <span id="provider-badge" class="badge badge-neutral">Checking AI Engine...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- Input Configuration Section -->
+    <section class="card input-card">
+      <div class="card-header">
+        <h2 class="card-title">1. Pitch Your Animation Idea</h2>
+        <p class="card-description">
+          Enter a rough premise or visual concept. We'll turn it into a practical, scene-by-scene production outline.
+        </p>
+      </div>
+
+      <form id="generator-form" class="generator-form">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="idea-input">Story Idea or Premise</label>
+            <span id="char-counter" class="char-counter">0 / 500</span>
+          </div>
+          <textarea
+            id="idea-input"
+            rows="3"
+            maxlength="500"
+            placeholder="e.g., A tiny cloud wants to join a thunderstorm, but can only produce tiny squeaky sparks..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="options-grid">
+          <!-- Runtime Selection -->
+          <div class="form-group">
+            <label for="runtime-select">Runtime & Pace</label>
+            <select id="runtime-select">
+              <option value="30s">30 Seconds (2–3 scenes, punchy)</option>
+              <option value="1m" selected>1 Minute (4–5 scenes, balanced)</option>
+              <option value="3m">3 Minutes (6–8 scenes, expanded)</option>
+            </select>
+          </div>
+
+          <!-- Mood Selection -->
+          <div class="form-group">
+            <label for="mood-select">Mood</label>
+            <select id="mood-select">
+              <option value="funny">Funny & Comedic</option>
+              <option value="heartwarming" selected>Heartwarming & Sweet</option>
+              <option value="mysterious">Mysterious & Atmospheric</option>
+              <option value="adventurous">Adventurous & Dynamic</option>
+            </select>
+          </div>
+
+          <!-- Audience Selection -->
+          <div class="form-group">
+            <label for="audience-select">Target Audience</label>
+            <select id="audience-select">
+              <option value="children">Children (Gentle & clear)</option>
+              <option value="teens">Teens (Relatable & quirky)</option>
+              <option value="general" selected>General (Universal Pixar style)</option>
+            </select>
+          </div>
+
+          <!-- Dialogue Option -->
+          <div class="form-group">
+            <label for="dialogue-select">Voice & Dialogue</label>
+            <select id="dialogue-select">
+              <option value="false" selected>Silent / Visual Pantomime Only</option>
+              <option value="true">With Dialogue / Narration</option>
+            </select>
+          </div>
+
+          <!-- Complexity Option -->
+          <div class="form-group">
+            <label for="complexity-select">Production Scope</label>
+            <select id="complexity-select">
+              <option value="simple" selected>Simple (1-2 characters, 1 location)</option>
+              <option value="detailed">Detailed (Multi-beat, dynamic angles)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="generate-btn" class="btn btn-primary">
+            <span class="btn-text">Generate Animation Plan</span>
+            <span class="spinner hidden" id="generate-spinner"></span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Error Alert Container -->
+    <div id="error-banner" class="alert alert-error hidden" role="alert">
+      <span class="alert-icon">⚠️</span>
+      <div id="error-message" class="alert-content">An error occurred.</div>
+      <button type="button" class="btn-close" id="error-close-btn">&times;</button>
+    </div>
+
+    <!-- Output Section (Hidden initially) -->
+    <section id="output-section" class="output-section hidden">
+
+      <!-- Plan Header & Controls -->
+      <div class="plan-toolbar">
+        <div class="toolbar-info">
+          <span class="editable-hint">✏️ Click any text field below to edit directly in the browser</span>
+        </div>
+        <div class="toolbar-actions">
+          <button type="button" id="copy-btn" class="btn btn-secondary">
+            📋 Copy Formatted Plan
+          </button>
+          <button type="button" id="open-revision-btn" class="btn btn-accent">
+            ✨ Request Revision
+          </button>
+        </div>
+      </div>
+
+      <!-- Plan Document Card -->
+      <article class="card plan-card">
+        <!-- Metadata Header -->
+        <div class="plan-header">
+          <div class="form-group">
+            <label class="field-label">Title</label>
+            <input type="text" id="plan-title" class="editable-input plan-title-input" />
+          </div>
+
+          <div class="plan-tags" id="plan-tags">
+            <!-- Dynamic tags injected here -->
+          </div>
+
+          <div class="form-group">
+            <label class="field-label">Logline / Premise</label>
+            <textarea id="plan-logline" class="editable-textarea plan-logline-input" rows="2"></textarea>
+          </div>
+        </div>
+
+        <!-- Characters Section -->
+        <div class="plan-section">
+          <h3 class="section-title">Characters & Casting</h3>
+          <div id="characters-container" class="characters-grid">
+            <!-- Dynamic character cards -->
+          </div>
+        </div>
+
+        <!-- Scenes Breakdown Section -->
+        <div class="plan-section">
+          <h3 class="section-title">Scene-by-Scene Storyboard Breakdown</h3>
+          <div id="scenes-container" class="scenes-list">
+            <!-- Dynamic scene cards -->
+          </div>
+        </div>
+
+        <!-- Sound Suggestions Section -->
+        <div class="plan-section">
+          <h3 class="section-title">Sound Design & Music Palette</h3>
+          <div class="form-group">
+            <textarea id="plan-sound" class="editable-textarea plan-sound-input" rows="3"></textarea>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- Revision Modal -->
+    <div id="revision-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Request a Story Revision</h3>
+          <button type="button" class="btn-close" id="modal-close-btn">&times;</button>
+        </div>
+        <p class="modal-description">
+          Tell the AI director what changes you'd like to make while keeping existing characters and setup.
+        </p>
+
+        <form id="revision-form">
+          <div class="form-group">
+            <textarea
+              id="revision-input"
+              rows="3"
+              maxlength="300"
+              placeholder="e.g., Make the ending funnier, or change scene 2 so the cloud tries to disguise itself as a dark storm..."
+              required
+            ></textarea>
+            <div class="hint-row">
+              <span class="quick-hint" data-hint="Make the ending more comedic and punchy">💡 Make ending funnier</span>
+              <span class="quick-hint" data-hint="Simplify to only a single location">💡 Use fewer locations</span>
+              <span class="quick-hint" data-hint="Make character interaction more heartfelt">💡 More heartwarming</span>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="submit-revision-btn">
+              <span class="btn-text">Apply Revision</span>
+              <span class="spinner hidden" id="revision-spinner"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Informational & Legal Safeguards Footer -->
+    <footer class="app-footer">
+      <div class="footer-card">
+        <p class="footer-note">
+          <strong>Production Note:</strong> Generated animation plans are creative starting points designed for beginner and student feasibility. All outputs should be reviewed and adapted by the creative team.
+        </p>
+        <p class="footer-policy">
+          <strong>Artist Policy:</strong> This system does not imitate proprietary styles of living artists. Visual suggestions utilize neutral art descriptors (line weights, lighting, palettes).
+        </p>
+        <p class="footer-disclaimer">
+          <strong>Confidentiality Notice:</strong> Do not submit trade secrets, private scripts, or sensitive intellectual property unless the configured AI provider's data policy is acceptable to you. This application does not provide legal advice or binding NDAs.
+        </p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
